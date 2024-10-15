@@ -22,6 +22,7 @@
 
 #include "SMC_Utils.h"
 #include "ShamirUtil.h"
+#include "robustOpen.h"
 
 #if __SHAMIR__
 
@@ -33,9 +34,9 @@ using std::vector;
 /*
 contains the thresholdDecryption functionality from Noah's Ark (Dahl et al., 2023)
 Parameters:
-Q - ciphertext modulus
-p - plaintext modulus
-L - LWE dimension
+Q - ciphertext modulus (128-bit large prime)
+p - plaintext modulus (2^2)
+L - LWE dimension (1024)
 three values are entered into the computation:
     s_prime: a secret-shared L-bit secret key, used to compute b_prime
     a_prime: a *public* random L-vector (generated elsewhere)
@@ -51,47 +52,34 @@ Decryption is performed as follows (arithmetic modulo F_Q):
     - Call RobustOpen([v]) to obtain v = b -  a_prime (dot) s_prime + E
     - Recover m by computing round(v/Delta) (mod p)
 */
-void SMC_Utils::thresholdDecryption(priv_int *s_prime, mpz_t *a_prime, mpz_t b_prime, int size, int threadID) {
+void SMC_Utils::thresholdDecryption(priv_int *s_prime, mpz_t *a_prime, mpz_t b_prime, int L, int threadID) {
+
+    mpz_t field;
+    mpz_init(field);
+    ss->getFieldSize(field);
 
     // noise term
     mpz_t *E = (mpz_t *)malloc(sizeof(mpz_t) * 2);
-
     for (int i = 0; i < 2; i++) {
         mpz_init(E[i]);
     }
 
-    mpz_t E_term;
+    mpz_t E_term, v, result, Delta_prime, offset, temp1, temp2, const2;
     mpz_init(E_term);
-
-    mpz_t temp1, temp2, const1, const2, constK, constK_m1, constm, const2K_m1, const2K, const2m;
+    mpz_init(v);
+    mpz_init(result);
+    mpz_init(Delta_prime);
+    mpz_init(offset);
     mpz_init(temp1);
     mpz_init(temp2);
-    mpz_init_set_ui(const1, 1);
     mpz_init_set_ui(const2, 2);
+
     int log_Bd = 70;
     int pow = 47;
-    // mpz_init_set_ui(constK, K);
-    // mpz_init_set_ui(constK_m1, K - 1);
-    // mpz_init_set_ui(constm, m);
+    uint p = 4;
+    mpz_fdiv_q_ui(Delta_prime, field, p);
 
-    mpz_t offset;
-    mpz_init(offset);
-    mpz_pow_ui(offset, const2, pow + log_Bd - 1);
-    // mpz_t modulus, pow_term, Bd;
-    // mpz_init(pow_term);
-    // mpz_init(Bd);
-
-    // mpz_init(const2K);
-    // mpz_init(const2K_m1);
-    // mpz_init(const2m);
-
-    // mpz_pow_ui(pow_term, const2, 47); // 2^47
-    // // mpz_pow_ui(pow_term, const2, 47); // 2^47
-    // mpz_sub(temp1, pow_term, const1);
-    // mpz_mul(temp1, temp1, Bd); // temp1 contains (2^pow -1)*2^70
-
-    // long long nu = nChoosek(ss->getPeers(), ss->getThreshold());
-    // mpz_fdiv_q_ui(modulus, temp1, nu); // computes ((2^pow -1)*2^70) / (n Choose t)
+    mpz_pow_ui(offset, const2, pow + log_Bd - 1); // computing 2^(pow + log_Bd - 1)
 
     // N.A. needs two PRSS's in the range [-2^(pow-1)*Bd , ... , 2^(pow-1)*Bd - 1]
     // Bd \approx 2^70
@@ -101,14 +89,30 @@ void SMC_Utils::thresholdDecryption(priv_int *s_prime, mpz_t *a_prime, mpz_t b_p
     PRSS(pow + log_Bd, 2, E, threadID, ss);
     ss->modSub(E, E, offset, 2);
 
+    // computing [E] <- PRSS.next + PRSS.next
     ss->modAdd(E_term, E_term, E[0]);
     ss->modAdd(E_term, E_term, E[1]);
 
+    // computing
+    // [v] <- b_prime - a_prime (dot) [s_prime] + [E]
+    ss->modDotPub(v, s_prime, a_prime, L);
+    ss->modSub(v, b_prime, v);
+    ss->modAdd(v, v, E_term);
 
+    RobustOpen(result, v, -1, net, ss);
 
     for (int i = 0; i < 2; i++)
         mpz_clear(E[i]);
     free(E);
+
+    mpz_clear(E_term);
+    mpz_clear(v);
+    mpz_clear(result);
+    mpz_clear(Delta_prime);
+    mpz_clear(offset);
+    mpz_clear(temp1);
+    mpz_clear(temp2);
+    mpz_clear(const2);
 }
 
 #endif

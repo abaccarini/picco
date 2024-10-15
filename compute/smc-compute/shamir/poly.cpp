@@ -186,8 +186,8 @@ void poly::sub(poly &other) {
 
         for (int i = 0; i < other.coef_sz; i++) {
             mpz_init(coeffs[i]);
-        // }
-        // for (int i = 0; i < other.coef_sz; i++) {
+            // }
+            // for (int i = 0; i < other.coef_sz; i++) {
             modSub(this->coeffs[i], long(0), other.coeffs[i]);
         }
 
@@ -441,17 +441,12 @@ void RS_decode(poly &result, poly &error_loc, vector<int> &points, mpz_t *shares
     interpolate(H, points, shares, numShares, modulus);
 
     modMath math = modMath(modulus);
-    mpz_t nom, denom, t1, t2, temp;
-    mpz_init(nom);
-    mpz_init(denom);
+    mpz_t t1, t2;
     mpz_init(t1);
     mpz_init(t2);
-    mpz_init(temp);
-    int xi, xj;
 
     poly temp_poly = poly(modulus, {1, 1});
     poly F = poly(modulus, {1});
-
 
     for (size_t i = 0; i < points.size(); i++) {
 
@@ -480,28 +475,20 @@ void RS_decode(poly &result, poly &error_loc, vector<int> &points, mpz_t *shares
     while (true) {
         R0.div_mod(Q, R2, R1);
 
-        // Q.print("Q");
-        // R2.print("R2");
         if (R0.degree < (max_error_count + max_degree)) {
             R0.div_mod(G, remainder, T0);
-            // G.print("G");
-            // remainder.print("remainder");
 
             // remainder is the zero polynomial
             if (remainder.degree == -1) {
                 result = G;
                 error_loc = T0;
 
-                // result.print("RESULT ");
-                // error_loc.print("ERRORS ");
-
                 return;
             } else {
-                cout << "too many errors" << endl;
+                cout << "too many errors encountered, aborting..." << endl;
                 return;
             }
         }
-        // printf("--------------\n");
 
         R0 = R1;
         R1 = R2;
@@ -515,26 +502,10 @@ void RS_decode(poly &result, poly &error_loc, vector<int> &points, mpz_t *shares
         S1 = temp2;
 
         temp1 = T1;
-        temp1.mult(Q);
-        // temp1.print("temp1");
 
         temp2 = T0;
-        // temp2.print("temp2 b");
         temp2.sub(temp1);
-        // temp2.print("temp2 a");
         T0 = T1;
         T1 = temp2;
-
-        // R0.print("R0");
-        // S0.print("S0");
-        // T0.print("T0");
-
-    //     R1.print("R1");
-    //     S1.print("S1");
-    //     T1.print("T1"); // backwards?
-    //     printf("\n");
     }
-
-    // Q.print("Q");
-    // R2.print("R2");
 }

@@ -31,19 +31,6 @@ int __original_main(int _argc_ignored, char **_argv_ignored) {
 
     __s->thresholdDecryption(sprime, aprime, bprime, L, -1);
 
-    // i = 0;
-    // for (; i < L;) {
-    //     {
-    //         printf("s_prime[%i] %d\n", i, __s->smc_open(sprime[i], -1), -1);
-    //     }
-    //     i++;
-    // }
-    // priv_int a;
-    // ss_init(a);
-    // __s->smc_dot(aprime, sprime, L, a, -1);
-    // printf("a_prime dot s_prime %d\n", __s->smc_open(a, -1), -1);
-    // ss_clear(a);
-
     for (int _picco_i = 0; _picco_i < L; _picco_i++) {
         ss_clear(sprime[_picco_i]);
         ss_clear(aprime[_picco_i]);
@@ -52,7 +39,7 @@ int __original_main(int _argc_ignored, char **_argv_ignored) {
     free(aprime);
     ss_clear(bprime);
 
-    return (0);
+    return 0;
 }
 
 /* smc-compiler generated main() */

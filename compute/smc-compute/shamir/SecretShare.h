@@ -86,6 +86,7 @@ public:
     // Evaluate a polynomial represented by threshold+1 shares on another threshold+1 points
     void getSharesMul(mpz_t **, mpz_t **, unsigned int);
 
+    void modDotPub(mpz_t result, mpz_t *x, mpz_t *pub, int size);
     void modDotPub(mpz_t result, mpz_t *x, int *y, int size);
 
     // Modular Multiplication

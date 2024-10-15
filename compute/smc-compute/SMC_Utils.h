@@ -129,8 +129,8 @@ public:
 
     void smc_sum(priv_int *a, priv_int result, int size);
 
-    void smc_dot(int *a, priv_int *b, int size, priv_int result, int threadID);
-    void smc_dot(priv_int *a, int *b, int size, priv_int result, int threadID);
+    // void smc_dot(long *a, priv_int *b, int size, priv_int result, int threadID);
+    // void smc_dot(priv_int *a, int *b, int size, priv_int result, int threadID);
 
     /************************************* Subtraction *************************************/
     /********** singular operations ***********/
