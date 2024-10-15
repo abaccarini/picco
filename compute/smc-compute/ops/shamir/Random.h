@@ -23,6 +23,7 @@
 
 #include "Operation.h"
 
+void PRSS(int K, int size, mpz_t *result, int threadID, SecretShare *ss) ;
 
 void PRandInt(int K, int M, int size, mpz_t *result, int threadID, SecretShare *ss) ;
 void PRandBit(int size, mpz_t *results, int threadID, NodeNetwork net,  SecretShare *ss);

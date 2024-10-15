@@ -37,6 +37,15 @@ void PRandInt(int K, int M, int size, mpz_t *result, int threadID, SecretShare *
     ss->generateRandValue(bits, size, result, threadID);
 }
 
+void PRSS(int bits, int size, mpz_t *result, int threadID, SecretShare *ss) {
+    // sanitizing destination (so the results variable can be reused in something like EQZ)
+    for (int i = 0; i < size; i++) {
+        mpz_set_ui(result[i], 0);
+    }
+    //  generateRandValue checks if threadID is -1 and calls appropriate version
+    ss->generateRandValue(bits, size, result, threadID);
+}
+
 void PRandBit(int size, mpz_t *results, int threadID, NodeNetwork net, SecretShare *ss) {
     int peers = ss->getPeers();
     mpz_t **resultShares = (mpz_t **)malloc(sizeof(mpz_t *) * peers);

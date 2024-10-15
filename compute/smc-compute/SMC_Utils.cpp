@@ -990,6 +990,13 @@ void SMC_Utils::smc_shl(priv_int *a, int *b, int alen, int blen, priv_int *resul
     ss->modMul(result, a, result, size);
 }
 
+void SMC_Utils::smc_dot(int *a, priv_int *b, int size, priv_int result, int threadID) {
+    ss->modDotPub(result, b, a, size);
+}
+void SMC_Utils::smc_dot(priv_int *b, int *a, int size, priv_int result, int threadID) {
+    ss->modDotPub(result, b, a, size);
+}
+
 // Dot Product
 void SMC_Utils::smc_dot(priv_int *a, priv_int *b, int size, priv_int result, int threadID) {
     doOperation_DotProduct(a, b, result, size, threadID, net, ss);

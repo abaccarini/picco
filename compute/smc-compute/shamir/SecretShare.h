@@ -73,6 +73,8 @@ public:
     void computeLagrangeWeights();
     void computeSharingMatrix();
 
+    void computeLagrangePolys();
+
     // Reconstruct a secret from n shares
     void reconstructSecret(mpz_t, mpz_t *);
     void reconstructSecret(mpz_t *, mpz_t **, int);
@@ -83,6 +85,8 @@ public:
 
     // Evaluate a polynomial represented by threshold+1 shares on another threshold+1 points
     void getSharesMul(mpz_t **, mpz_t **, unsigned int);
+
+    void modDotPub(mpz_t result, mpz_t *x, int *y, int size);
 
     // Modular Multiplication
     void modMul(mpz_t, mpz_t, mpz_t);
@@ -148,6 +152,12 @@ public:
 
     int computePolynomials(std::vector<int> polys, int point);
 
+    // uint computeMultPolySize(uint A_size, uint B_size);
+    // int computePolyLen(mpz_t *A, int A_len);
+    // void polyMult(mpz_t *result, mpz_t *A, mpz_t *B, uint A_size, uint B_size);
+    // void polyDivRemainder(mpz_t *quotient, mpz_t *remainder, mpz_t *A, mpz_t *B, uint A_size, uint B_size, uint &Q_size, uint &R_size);
+    // void interpolate(mpz_t *result, mpz_t *y);
+    // void gaoDecoding(mpz_t *result, mpz_t *shares);
     void randInit(unsigned char *keys[KEYSIZE]);
     void randInit_thread(int threadID);
     void randInit_thread_mult(int threadID);
@@ -216,6 +226,8 @@ private:
     mpz_t **sharingMatrix;
     //    int bits;
     gmp_randstate_t rstate;
+
+    mpz_t **lagrangePolysAll; // used for robust reconstruction
 
     // peers to whom a share or shares will be sent, numbered consequently
     // from myID (myID+1, ..., myID+t)

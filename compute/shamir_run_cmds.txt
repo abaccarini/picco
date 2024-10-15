@@ -1,0 +1,16 @@
+
+./../compiler/bin/picco -d sample-programs/non-thread/ark.c ../compiler/smc-config shamir_main confs/shamir_conf
+./../compiler/bin/picco-utility -I 1 sample-programs/non-thread/ark-data confs/shamir_conf shares/test_op_shares_
+
+./build/shamir_main 1 confs/runtime-config-mine private01.pem 1 1 shares/test_op_shares_1 outputs/output_test_op
+./build/shamir_main 2 confs/runtime-config-mine private01.pem 1 1 shares/test_op_shares_2 outputs/output_test_op
+./build/shamir_main 3 confs/runtime-config-mine private01.pem 1 1 shares/test_op_shares_3 outputs/output_test_op
+
+
+
+./build/shamir_main 1 confs/runtime-config-mine-5 private01.pem 1 1 shares/test_op_shares_1 outputs/output_test_op
+./build/shamir_main 2 confs/runtime-config-mine-5 private01.pem 1 1 shares/test_op_shares_2 outputs/output_test_op
+./build/shamir_main 3 confs/runtime-config-mine-5 private01.pem 1 1 shares/test_op_shares_3 outputs/output_test_op
+./build/shamir_main 4 confs/runtime-config-mine-5 private01.pem 1 1 shares/test_op_shares_4 outputs/output_test_op
+./build/shamir_main 5 confs/runtime-config-mine-5 private01.pem 1 1 shares/test_op_shares_5 outputs/output_test_op
+

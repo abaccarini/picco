@@ -390,7 +390,7 @@ void NodeNetwork::broadcastToPeers(mpz_t *data, int size, mpz_t **buffers) {
         }
     }
     for (int j = 0; j < size; j++)
-        mpz_set(buffers[id - 1][j], data[j]);
+        mpz_set(buffers[id - 1][j], data[j]); // moving my data into buffers at position (my)id - 1
 }
 
 /* this function sends identical data to all other peers and receives data from all of them */

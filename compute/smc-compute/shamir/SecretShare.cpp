@@ -481,6 +481,17 @@ void SecretShare::getShares(mpz_t **shares, mpz_t *secrets, int size) {
     mpz_clear(temp);
 }
 
+
+void SecretShare::modDotPub(mpz_t result, mpz_t *x, int *y, int size) {
+mpz_t temp;
+    mpz_init(temp);
+    for (int i = 0; i < size; ++i) {
+        modMul(temp, x[i], y[i]);
+        modAdd(result, result, temp);
+    }
+    mpz_clear(temp);
+}
+
 void SecretShare::modMul(mpz_t result, mpz_t x, mpz_t y) {
     mpz_mul(result, x, y);
     mpz_mod(result, result, fieldSize);
@@ -955,6 +966,272 @@ void SecretShare::computeLagrangeWeights() {
     mpz_clear(temp);
 }
 
+// uint SecretShare::computeMultPolySize(uint A_size, uint B_size) {
+//     return A_size + B_size - 1;
+// }
+
+// void SecretShare::computeLagrangePolys() {
+//     // return;
+//     mpz_t nom, denom, t1, t2, temp;
+//     mpz_init(nom);
+//     mpz_init(denom);
+//     mpz_init(t1);
+//     mpz_init(t2);
+//     mpz_init(temp);
+//     unsigned int i, j;
+
+//     uint num_poly_size, computed_poly_size;
+//     std::cout << "peers :" << peers << endl;
+
+//     mpz_t *temp_poly = (mpz_t *)malloc(sizeof(mpz_t) * 2);
+//     for (int i = 0; i < 2; i++)
+//         mpz_init_set_ui(temp_poly[i], 1); // initalized to all 1's
+
+//     mpz_t *num_poly = (mpz_t *)malloc(sizeof(mpz_t) * peers);    // max size of peers
+//     mpz_t *temp_poly_2 = (mpz_t *)malloc(sizeof(mpz_t) * peers); // max size of peers
+//     for (int i = 0; i < peers; i++) {
+//         mpz_init_set_ui(num_poly[i], 1); // initalized to all 1's
+//         mpz_init(temp_poly_2[i]);        // initalized to all 0's
+//     }
+
+//     // allocating space for polynomial coefficients
+//     lagrangePolysAll = (mpz_t **)malloc(sizeof(mpz_t *) * peers);
+//     for (int i = 0; i < peers; i++) {
+//         lagrangePolysAll[i] = (mpz_t *)malloc(sizeof(mpz_t) * peers);
+//         for (int j = 0; j < peers; j++) {
+//             mpz_init(lagrangePolysAll[i][j]);
+//             mpz_set_ui(lagrangePolysAll[i][j], 1);
+//         }
+//     }
+
+//     for (i = 0; i < peers; i++) {
+//         num_poly_size = 1; // resets each loop
+
+//         for (int l = 0; l < peers; l++) {
+//             mpz_set_ui(num_poly[l], 1); // resetting num_poly
+//         }
+//         mpz_set_ui(denom, 1);
+//         mpz_set_ui(t2, i + 1); // xi
+//         for (j = 0; j < peers; j++) {
+//             if (i != j) {
+//                 mpz_set_ui(t1, j + 1);             // xj
+//                 modSub(temp_poly[0], long(0), t1); //  -xj
+//                 // temp_poly contains [-xj, 1], always size 2
+//                 // num_poly initalized to all 1's, num_poly_size starts at 1
+//                 // for (size_t l = 0; l < 2; l++) {
+//                 //     gmp_printf("temp_poly[%i] %Zu\n", l, temp_poly[l]);
+//                 // }
+//                 // for (size_t l = 0; l < num_poly_size; l++) {
+//                 //     gmp_printf("num_poly[%i] %Zu\n", l, num_poly[l]);
+//                 // }
+
+//                 computed_poly_size = computeMultPolySize(2, num_poly_size);
+//                 // std::cout << "res poly size " << computed_poly_size << endl;
+//                 polyMult(temp_poly_2, temp_poly, num_poly, 2, num_poly_size);
+
+//                 // for (size_t l = 0; l < computed_poly_size; l++) {
+//                 //     gmp_printf("temp_poly_2[%i] %Zu\n", l, temp_poly_2[l]);
+//                 // }
+
+//                 // moving result into num_poly
+//                 copy(temp_poly_2, num_poly, computed_poly_size);
+//                 // polynomial multiplication in numerator
+
+//                 modSub(temp, t2, t1); //  xi - xj
+//                 modMul(denom, denom, temp);
+//                 num_poly_size += 1; // increments each time polyMult is called
+
+//                 for (int l = 0; l < peers; l++) {
+//                     mpz_set_ui(temp_poly_2[l], 0); // resetting temp
+//                 }
+//             }
+//         }
+
+//         // for (size_t l = 0; l < num_poly_size; l++) {
+//         //     gmp_printf("num_poly[%i] %Zu\n", l, num_poly[l]);
+//         // }
+
+//         // gmp_printf("den %Zu\n", denom);
+//         modInv(temp, denom);
+//         for (int l = 0; l < peers; l++) {
+//             modMul(lagrangePolysAll[i][l], num_poly[l], temp);
+//         }
+
+//         // printf("\n");
+//         for (size_t l = 0; l < peers; l++) {
+//             // gmp_printf("lagrangePolysAll[%i][%i] %Zu\n", i, l, lagrangePolysAll[i][l]);
+//         }
+//         // printf("\n");
+//     }
+
+//     mpz_clear(nom);
+//     mpz_clear(denom);
+//     mpz_clear(t1);
+//     mpz_clear(t2);
+//     mpz_clear(temp);
+// }
+
+// // multiplies the polynomials A and B
+// // A[i] corresponds to the coefficient of X^i
+// void SecretShare::polyMult(mpz_t *result, mpz_t *A, mpz_t *B, uint A_size, uint B_size) {
+//     mpz_t temp;
+//     mpz_init(temp);
+//     for (int i = 0; i < A_size; i++) {
+//         for (int j = 0; j < B_size; j++) {
+//             modMul(temp, A[i], B[j]);
+//             modAdd(result[i + j], result[i + j], temp);
+//         }
+//     }
+//     mpz_clear(temp);
+// }
+
+// // declare quotient and remainder as max(A_size, B_size) (to make sure we have enough space)
+// // divides polynomials A and B
+// // computes remainder polynomial
+// // A[i] corresponds to the coefficient of X^i
+// void SecretShare::polyDivRemainder(mpz_t *quotient, mpz_t *remainder, mpz_t *A, mpz_t *B, uint A_size, uint B_size, uint &Q_size, uint &R_size) {
+//     mpz_t temp;
+//     mpz_t inv;
+//     mpz_init(temp);
+//     mpz_init(inv);
+
+//     for (int i = 0; i < A_size; i++) {
+//         mpz_set_ui(quotient[i], 0);
+//     }
+
+//     copy(A, remainder, A_size);
+//     modInv(inv, B[B_size - 1]);
+
+//     int len = A_size - B_size + 1;
+
+//     for (int i = len - 1; i >= 0; i--) {
+//         modMul(quotient[i], remainder[i], inv);
+//         for (int j = 0; j < B_size; j++) {
+//             modMul(temp, quotient[i], B[j]);
+//             modSub(remainder[i + j], remainder[i + j], temp);
+//         }
+//     }
+
+//     Q_size = computePolyLen(quotient, A_size);
+//     R_size = computePolyLen(remainder, A_size);
+//     // compute output length of Q and R (stripping trailing zeros)
+
+//     mpz_clear(temp);
+//     mpz_clear(inv);
+// }
+
+// // input is a polynomial A of at most A_len
+// // computes the actual length of the poly (i.e., pos of maximum nonzero coeff)
+// int SecretShare::computePolyLen(mpz_t *A, int A_len) {
+//     for (int i = A_len - 1; i >= 0; i--) {
+//         if (mpz_cmp_si(A[i], 0) != 0) {
+//             return i + 1;
+//         }
+//     }
+//     return 0;
+// }
+
+// // interpolate from all shares
+// // shares are ordered by participant
+// void SecretShare::interpolate(mpz_t *result, mpz_t *y) {
+
+//     mpz_t *temp_poly = (mpz_t *)malloc(sizeof(mpz_t) * peers);
+
+//     for (int i = 0; i < peers; i++) {
+//         mpz_set_ui(temp_poly[i], 0);
+//         mpz_set_ui(result[i], 0);
+//     }
+
+//     for (int peer = 0; peer < peers; peer++) {
+//         // for (int i = 0; i < peers; i++) {
+//         modMul(temp_poly, lagrangePolysAll[peer], y[peer], peers); // scalar mult of all coefs in lagrangePolysAll[peer] by y[peer]
+
+//         modAdd(result, result, temp_poly, peers);
+//     }
+
+//     for (int i = 0; i < peers; i++) {
+//         mpz_clear(temp_poly[i]);
+//     }
+//     free(temp_poly);
+// }
+
+// // reconstruction of a secret that which may contain errors
+// // assumes we have all shares available, some of which may contain deliberate errors
+// void SecretShare::gaoDecoding(mpz_t *result, mpz_t *shares) {
+
+//     int max_poly_size = peers + 1;
+//     int max_degree = threshold + 1;
+//     int max_errors = 1;
+
+//     mpz_t nom, denom, t1, t2, temp;
+//     mpz_init(nom);
+//     mpz_init(denom);
+//     mpz_init(t1);
+//     mpz_init(t2);
+//     mpz_init(temp);
+
+//     mpz_t *Fi = (mpz_t *)malloc(sizeof(mpz_t) * 2);
+//     for (int i = 0; i < 2; i++)
+//         mpz_init_set_ui(Fi[i], 1); // initalized to all 1's
+
+//     mpz_t *poly1 = (mpz_t *)malloc(sizeof(mpz_t) * max_poly_size);
+//     mpz_t *poly2 = (mpz_t *)malloc(sizeof(mpz_t) * max_poly_size);
+
+//     mpz_t *poly3 = (mpz_t *)malloc(sizeof(mpz_t) * max_poly_size);
+//     mpz_t *poly4 = (mpz_t *)malloc(sizeof(mpz_t) * max_poly_size);
+
+//     mpz_t *poly5 = (mpz_t *)malloc(sizeof(mpz_t) * max_poly_size);
+//     mpz_t *poly6 = (mpz_t *)malloc(sizeof(mpz_t) * max_poly_size);
+
+//     for (int i = 0; i < max_poly_size; i++) {
+//         mpz_init_set_ui(poly1[i], 1);
+//         mpz_init_set_ui(poly2[i], 1);
+
+//         mpz_init_set_ui(poly3[i], 1);
+//         mpz_init_set_ui(poly4[i], 1);
+
+//         mpz_init_set_ui(poly5[i], 1);
+//         mpz_init_set_ui(poly6[i], 1);
+//     }
+
+//     mpz_t *H = (mpz_t *)malloc(sizeof(mpz_t) * max_poly_size);
+//     for (int i = 0; i < max_poly_size; i++) {
+//         mpz_init_set_ui(H[i], 0);
+//     }
+
+//     interpolate(H, shares);
+
+//     uint poly1_size, computed_poly_size;
+//     poly1_size = 1;
+//     for (int i = 0; i < peers; i++) {
+//         for (int l = 0; l < max_poly_size; l++) {
+//             mpz_set_ui(poly1[l], 1); // resetting num_poly
+//         }
+
+//         mpz_set_ui(t1, i + 1);      // xi
+//         modSub(Fi[0], long(0), t1); //  -xi
+
+//         // Fi contains [-xj, 1], always size 2
+
+//         computed_poly_size = computeMultPolySize(2, poly1_size);
+//         polyMult(poly2, Fi, poly1, 2, poly1_size);
+//         copy(poly2, poly1, computed_poly_size); // moving poly2 into poly1
+//         poly1_size = computed_poly_size;
+
+//         for (int l = 0; l < max_poly_size; l++) {
+//             mpz_set_ui(poly2[l], 0); // clearing poly2
+//         }
+//     }
+
+//     // H contains the interpolation
+//     // poly1 contains F
+
+//     for (int i = 0; i < max_poly_size; i++) {
+//         mpz_clear(H[i]);
+//     }
+//     free(H);
+// }
+
 /* reconstruction of a secret from n=peers shares */
 void SecretShare::reconstructSecret(mpz_t result, mpz_t *y) {
     mpz_t temp;
@@ -968,6 +1245,7 @@ void SecretShare::reconstructSecret(mpz_t result, mpz_t *y) {
 }
 
 /* reconstruction of a number of secrets from n=peers shares each */
+// this is iterpolation
 void SecretShare::reconstructSecret(mpz_t *result, mpz_t **y, int size) {
     mpz_t temp;
     mpz_init(temp);
@@ -1150,7 +1428,6 @@ void SecretShare::getCoef(int id) {
 }
 
 // random generation functions, was previously in Random.cpp
-
 int SecretShare::computePolynomials(vector<int> polys, int point) {
     int result = 0;
     for (unsigned int i = 0; i < polys.size(); i++)

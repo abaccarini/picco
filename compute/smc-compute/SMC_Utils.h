@@ -129,6 +129,9 @@ public:
 
     void smc_sum(priv_int *a, priv_int result, int size);
 
+    void smc_dot(int *a, priv_int *b, int size, priv_int result, int threadID);
+    void smc_dot(priv_int *a, int *b, int size, priv_int result, int threadID);
+
     /************************************* Subtraction *************************************/
     /********** singular operations ***********/
     // 1) private int - private int
@@ -595,9 +598,13 @@ public:
     void getCombinations(std::vector<int> &elements, int reqLen, std::vector<int> &pos, int depth, int margin, std::vector<std::vector<int>> &result);
     std::vector<int> generateCoefficients(std::vector<int> T_set, int threshold);
 
+#if __SHAMIR__
+    void thresholdDecryption(priv_int *s_prime, priv_int *a_prime, priv_int b_prime, int size, int threadID);
+
+#endif
+
 #if __RSS__
     void smc_test_rss(priv_int *A, int *B, int size, int threadID);
-
     void smc_rss_benchmark(std::string exp_name, int size, int num_iterations);
     uint getNumShares();
     void offline_prg(uint8_t *dest, uint8_t *src, __m128i *ri);
