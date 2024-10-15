@@ -51,8 +51,15 @@ Decryption is performed as follows (arithmetic modulo F_Q):
     - compute [v] <- b_prime - a_prime (dot) [s_prime] + [E]
     - Call RobustOpen([v]) to obtain v = b -  a_prime (dot) s_prime + E
     - Recover m by computing round(v/Delta) (mod p)
+
+error_flag determines if we introduce the maximium number of errors into the computation during robustOpening
 */
-void SMC_Utils::thresholdDecryption(priv_int *s_prime, mpz_t *a_prime, mpz_t b_prime, int L, int threadID) {
+void SMC_Utils::thresholdDecryption(priv_int *s_prime, mpz_t *a_prime, mpz_t b_prime, int L, int threadID, double &offline_time, double &online_time, bool error_flag) {
+    struct timeval tv1;
+    struct timeval tv2;
+    int _xval = 0;
+
+    gettimeofday(&tv1, NULL);
 
     mpz_t field;
     mpz_init(field);
@@ -86,6 +93,9 @@ void SMC_Utils::thresholdDecryption(priv_int *s_prime, mpz_t *a_prime, mpz_t b_p
     // pow = 47
     // => modulus = 2*2^pow*B2 = 2^(pow+1)*Bd
     // subtract generated value by 2^(pow-1)*Bd to obtain value in correct range
+
+    gettimeofday(&tv1, NULL);
+
     PRSS(pow + log_Bd, 2, E, threadID, ss);
     ss->modSub(E, E, offset, 2);
 
@@ -93,13 +103,20 @@ void SMC_Utils::thresholdDecryption(priv_int *s_prime, mpz_t *a_prime, mpz_t b_p
     ss->modAdd(E_term, E_term, E[0]);
     ss->modAdd(E_term, E_term, E[1]);
 
+    gettimeofday(&tv2, NULL);
+    offline_time += time_diff(&tv1, &tv2) * 1000.0;
+
+    gettimeofday(&tv1, NULL);
     // computing
     // [v] <- b_prime - a_prime (dot) [s_prime] + [E]
     ss->modDotPub(v, s_prime, a_prime, L);
     ss->modSub(v, b_prime, v);
     ss->modAdd(v, v, E_term);
 
-    RobustOpen(result, v, -1, net, ss);
+    RobustOpen(result, v, error_flag, -1, net, ss);
+    gettimeofday(&tv2, NULL);
+
+    online_time += time_diff(&tv1, &tv2) * 1000.0;
 
     for (int i = 0; i < 2; i++)
         mpz_clear(E[i]);

@@ -1,11 +1,10 @@
 
 ./../compiler/bin/picco -d sample-programs/non-thread/ark.c ../compiler/smc-config shamir_main confs/shamir_conf
-./../compiler/bin/picco-utility -I 1 sample-programs/non-thread/ark-data confs/shamir_conf shares/test_op_shares_
+./../compiler/bin/picco-utility -I 1 sample-programs/non-thread/ark-data confs/shamir_conf shares/sprime_shares_
 
 ./build/shamir_main 1 confs/runtime-config-mine private01.pem 1 1 shares/test_op_shares_1 outputs/output_test_op
 ./build/shamir_main 2 confs/runtime-config-mine private01.pem 1 1 shares/test_op_shares_2 outputs/output_test_op
 ./build/shamir_main 3 confs/runtime-config-mine private01.pem 1 1 shares/test_op_shares_3 outputs/output_test_op
-
 
 
 ./build/shamir_main 1 confs/runtime-config-mine-5 private01.pem 1 1 shares/test_op_shares_1 outputs/output_test_op
@@ -14,3 +13,63 @@
 ./build/shamir_main 4 confs/runtime-config-mine-5 private01.pem 1 1 shares/test_op_shares_4 outputs/output_test_op
 ./build/shamir_main 5 confs/runtime-config-mine-5 private01.pem 1 1 shares/test_op_shares_5 outputs/output_test_op
 
+
+
+./../compiler/bin/picco -d sample-programs/non-thread/ark.c ../compiler/smc-config shamir_main_test confs/shamir_conf_test
+./../compiler/bin/picco-utility -I 1 ark-data confs/shamir_conf shares/sprime_shares_
+
+./build/shamir_main 1 confs/runtime-config-mine-5 private01.pem 2 1 shares/sprime_shares_1 shares/ciphertext 
+./build/shamir_main 2 confs/runtime-config-mine-5 private01.pem 2 1 shares/sprime_shares_2 shares/ciphertext 
+./build/shamir_main 3 confs/runtime-config-mine-5 private01.pem 2 1 shares/sprime_shares_3 shares/ciphertext 
+./build/shamir_main 4 confs/runtime-config-mine-5 private01.pem 2 1 shares/sprime_shares_4 shares/ciphertext 
+./build/shamir_main 5 confs/runtime-config-mine-5 private01.pem 2 1 shares/sprime_shares_5 shares/ciphertext 
+
+./build/shamir_main 1 confs/runtime-config-mine-11 private01.pem 2 1 shares/sprime_shares_1 shares/ciphertext 
+./build/shamir_main 2 confs/runtime-config-mine-11 private01.pem 2 1 shares/sprime_shares_2 shares/ciphertext 
+./build/shamir_main 3 confs/runtime-config-mine-11 private01.pem 2 1 shares/sprime_shares_3 shares/ciphertext 
+./build/shamir_main 4 confs/runtime-config-mine-11 private01.pem 2 1 shares/sprime_shares_4 shares/ciphertext 
+./build/shamir_main 5 confs/runtime-config-mine-11 private01.pem 2 1 shares/sprime_shares_5 shares/ciphertext 
+./build/shamir_main 6 confs/runtime-config-mine-11 private01.pem 2 1 shares/sprime_shares_6 shares/ciphertext 
+./build/shamir_main 7 confs/runtime-config-mine-11 private01.pem 2 1 shares/sprime_shares_7 shares/ciphertext 
+./build/shamir_main 8 confs/runtime-config-mine-11 private01.pem 2 1 shares/sprime_shares_8 shares/ciphertext 
+./build/shamir_main 9 confs/runtime-config-mine-11 private01.pem 2 1 shares/sprime_shares_9 shares/ciphertext 
+./build/shamir_main 10 confs/runtime-config-mine-11 private01.pem 2 1 shares/sprime_shares_10 shares/ciphertext 
+./build/shamir_main 11 confs/runtime-config-mine-11 private01.pem 2 1 shares/sprime_shares_11 shares/ciphertext 
+
+
+
+
+
+tc commands 
+
+sudo tc qdisc del dev lo root
+
+
+-------------------LAN PARAMETERS----------------------
+sudo tc qdisc del dev lo root ; sudo tc qdisc add dev lo root tbf rate 1000Mbit latency 0.1ms burst 500000 ; sudo tc qdisc add dev lo root handle 1:0 netem delay 1msec; sudo tc qdisc show dev lo
+
+-------------------WAN PARAMETERS----------------------
+sudo tc qdisc del dev lo root ; sudo tc qdisc add dev lo root tbf rate 100Mbit latency 0.1ms burst 50000 ; 
+sudo tc qdisc add dev lo root handle 1:0 netem delay 100msec; 
+
+
+ sudo tc qdisc add dev lo root netem rate 1000Mbit delay 0.5ms
+ 
+ sudo tc qdisc show dev lo
+
+
+ sudo tc qdisc add dev lo root netem rate 100Mbit delay 50ms
+
+
+
+
+
+
+
+OLD DO NOT USE other than for testing
+
+./build/shamir_main 1 confs/runtime-config-mine-5 private01.pem 2 1 shares/sprime_shares_1 shares/ciphertext_1 outputs/output_test_op
+./build/shamir_main 2 confs/runtime-config-mine-5 private01.pem 2 1 shares/sprime_shares_2 shares/ciphertext_2 outputs/output_test_op
+./build/shamir_main 3 confs/runtime-config-mine-5 private01.pem 2 1 shares/sprime_shares_3 shares/ciphertext_3 outputs/output_test_op
+./build/shamir_main 4 confs/runtime-config-mine-5 private01.pem 2 1 shares/sprime_shares_4 shares/ciphertext_4 outputs/output_test_op
+./build/shamir_main 5 confs/runtime-config-mine-5 private01.pem 2 1 shares/sprime_shares_5 shares/ciphertext_5 outputs/output_test_op

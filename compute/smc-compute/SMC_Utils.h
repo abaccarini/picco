@@ -599,7 +599,7 @@ public:
     std::vector<int> generateCoefficients(std::vector<int> T_set, int threshold);
 
 #if __SHAMIR__
-    void thresholdDecryption(priv_int *s_prime, priv_int *a_prime, priv_int b_prime, int size, int threadID);
+void thresholdDecryption(priv_int *s_prime, mpz_t *a_prime, mpz_t b_prime, int L, int threadID, double &offline_time, double &online_time, bool error_flag);
 
 #endif
 

@@ -22,10 +22,12 @@
 #include "NodeConfiguration.h"
 #include "bit_utils.hpp"
 #include "openssl/bio.h"
+#include "poly.hpp"
 #include "time.h"
 #include "unistd.h"
 #include <cstdlib>
 #include <errno.h>
+#include <fcntl.h>
 #include <iostream>
 #include <netdb.h>
 #include <netinet/in.h>
@@ -166,15 +168,15 @@ NodeNetwork::NodeNetwork(NodeConfiguration *nodeConfig, std::string privatekey_f
     for (int i = 0; i < numOfThreads; i++)
         test_flags[i] = 0;
 
-        /*
-        ANB, 3/4/24
-        - there is a VERY strange "bug", where if the array sizes of the shifts below are declared to be of length sizeof(priv_int) * 8, and the subsequent for loops which populate each element with the corresponding mask
-        - if the for loop is upper bounded by sizeof(priv_int) * 8 + 1 (1 larger than allowed), it DOES NOT CAUSE A SEGFAULT
-        - e.g. if k = 32, and we declare SHIFT_RSS to be of length 32
-        - and the for loop is upper bounded by 32 INCLUSIVE, then we are accessing the following:
-            SHIFT_RSS[32]
-        - which is out of bounds, and should've ended in a segfault
-         */
+    /*
+    ANB, 3/4/24
+    - there is a VERY strange "bug", where if the array sizes of the shifts below are declared to be of length sizeof(priv_int) * 8, and the subsequent for loops which populate each element with the corresponding mask
+    - if the for loop is upper bounded by sizeof(priv_int) * 8 + 1 (1 larger than allowed), it DOES NOT CAUSE A SEGFAULT
+    - e.g. if k = 32, and we declare SHIFT_RSS to be of length 32
+    - and the for loop is upper bounded by 32 INCLUSIVE, then we are accessing the following:
+        SHIFT_RSS[32]
+    - which is out of bounds, and should've ended in a segfault
+     */
 #if __RSS__
     SHIFT_RSS = new priv_int_t[sizeof(priv_int_t) * 8 + 1];
     for (priv_int_t i = 0; i <= sizeof(priv_int_t) * 8; i++) {
@@ -770,7 +772,10 @@ void NodeNetwork::broadcastToPeers(mpz_t *data, int size, mpz_t **buffers, int t
     for (int j = 0; j < size; j++)
         mpz_set(buffers[id - 1][j], data[j]);
 }
-
+int is_non_blocking(int sock_fd) {
+    auto flags = fcntl(sock_fd, F_GETFL, 0);
+    return flags & O_NONBLOCK;
+}
 void NodeNetwork::requestConnection(int numOfPeers) {
     // key/iv for secure communication, plus key for seed
     peerKeyIV = (unsigned char *)malloc(2 * KEYSIZE + AES_BLOCK_SIZE);
@@ -857,7 +862,12 @@ void NodeNetwork::requestConnection(int numOfPeers) {
             if (priRkey == NULL)
                 throw std::runtime_error("Read Private Key for RSA");
             char *buffer = (char *)malloc(RSA_size(priRkey));
-            int n = read(sockfd[i], buffer, RSA_size(priRkey));
+            int n;
+            while ((n = read(sockfd[i], buffer, RSA_size(priRkey))) < 0) {
+                continue;
+            }
+            // cout<<"is sockfd "<<sockfd[i]<< "blocking? "<< is_non_blocking(sockfd[i])<<endl;
+            // cout<<"read "<<n<<endl;
             if (n < 0)
                 throw std::runtime_error("reading from socket 1");
             char *decrypt = (char *)malloc(n);
@@ -955,6 +965,9 @@ void NodeNetwork::acceptPeers(int numOfPeers) {
                     throw std::runtime_error("RSA public encrypt error");
                 if (write(newsockfd[i], encrypt, enc_len) < 0) // sending to peer
                     throw std::runtime_error("ERROR writing to socket");
+
+                // cout<<"is sockfd "<<newsockfd[i]<< "blocking? "<< is_non_blocking(newsockfd[i])<<endl;
+                // cout << "wrote to  " << newsockfd[i] << endl;
                 free(encrypt);
                 fclose(pubkeyfp);
 #else
@@ -1271,7 +1284,6 @@ void NodeNetwork::SendAndGetDataFromPeer(priv_int_t *SendData, priv_int_t **Recv
             }
         }
     }
-
 }
 
 // used for Open (5 and 7 pc)
@@ -1291,7 +1303,6 @@ void NodeNetwork::SendAndGetDataFromPeer(priv_int_t **SendData, priv_int_t **Rec
             }
         }
     }
-
 }
 
 void NodeNetwork::sendDataToPeer(int id, priv_int_t *data, int start, int amount, int size, uint ring_size) {
@@ -1394,7 +1405,6 @@ void NodeNetwork::SendAndGetDataFromPeer_bit(uint8_t *SendData, uint8_t *RecvDat
             getDataFromPeer_bit(send_recv_map[1][i], RecvData, k * count, count, size);
         }
     }
-
 }
 
 // used for multiplication
@@ -1481,8 +1491,5 @@ void NodeNetwork::getRounds_bit(int size, uint *count, uint *rounds) {
     else
         *rounds = size / (*count) - 1;
 }
-
-
-
 
 #endif

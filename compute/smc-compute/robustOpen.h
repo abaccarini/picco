@@ -5,4 +5,4 @@
 #include "modMath.hpp"
 
 
-void RobustOpen(mpz_t result, mpz_t var, int threadID, NodeNetwork nodeNet, SecretShare *ss) ;
+void RobustOpen(mpz_t result, mpz_t var, bool error_flag, int threadID, NodeNetwork nodeNet, SecretShare *ss) ;

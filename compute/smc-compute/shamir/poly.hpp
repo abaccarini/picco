@@ -19,7 +19,9 @@ public:
 
     poly(poly &t) : modMath(t) {
         this->coef_sz = t.coef_sz;
-        coeffs = new mpz_t[this->coef_sz];
+
+        coeffs = (mpz_t *)malloc(sizeof(mpz_t) * (this->coef_sz));
+        // coeffs = new mpz_t[this->coef_sz];
         for (int i = 0; i < this->coef_sz; i++) {
             mpz_init(coeffs[i]);
         }
@@ -31,7 +33,9 @@ public:
     poly &operator=(const poly &other) {
 
         this->coef_sz = other.coef_sz;
-        coeffs = new mpz_t[this->coef_sz];
+
+        coeffs = (mpz_t *)malloc(sizeof(mpz_t) * (this->coef_sz));
+        // coeffs = new mpz_t[this->coef_sz];
         for (int i = 0; i < this->coef_sz; i++) {
             mpz_init(coeffs[i]);
         }

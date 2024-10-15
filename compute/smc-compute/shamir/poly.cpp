@@ -1,6 +1,8 @@
 
 #include "poly.hpp"
+#include <algorithm>
 #include <cstdio>
+#include <functional>
 #include <iostream>
 
 int poly::computeTrueLen(vector<int> A, int A_len) {
@@ -29,7 +31,7 @@ void poly::truncateZeros() {
 
     if (new_coef_sz < this->coef_sz) {
 
-        mpz_t *new_coeffs = new mpz_t[new_coef_sz];
+        mpz_t *new_coeffs = (mpz_t *)malloc(sizeof(mpz_t) * new_coef_sz);
 
         for (int i = 0; i < new_coef_sz; i++) {
             mpz_init(new_coeffs[i]);
@@ -48,7 +50,8 @@ poly::poly(mpz_t _PRIME, mpz_t *_coef, int _coef_sz) : modMath(_PRIME) {
     coef_sz = computeTrueLen(_coef, _coef_sz);
     // std::cout << "coef_sz = " << coef_sz << std::endl;
     if (coef_sz > 0) {
-        coeffs = new mpz_t[coef_sz];
+
+        coeffs = (mpz_t *)malloc(sizeof(mpz_t) * coef_sz);
         for (int i = 0; i < coef_sz; i++) {
             mpz_init(coeffs[i]);
         }
@@ -74,7 +77,8 @@ poly::poly(mpz_t _PRIME, vector<int> _coef) : modMath(_PRIME) {
 
     // std::cout << "v coef_sz = " << coef_sz << std::endl;
     if (coef_sz > 0) {
-        coeffs = new mpz_t[coef_sz];
+
+        coeffs = (mpz_t *)malloc(sizeof(mpz_t) * coef_sz);
         for (size_t i = 0; i < coef_sz; i++) {
             mpz_init_set_si(coeffs[i], _coef.at(i));
         }
@@ -100,7 +104,7 @@ void poly::updatePoly(mpz_t *new_coeff, int new_coef_sz) {
     coef_sz = computeTrueLen(new_coeff, new_coef_sz);
 
     if (coef_sz > 0) {
-        coeffs = new mpz_t[coef_sz];
+        coeffs = (mpz_t *)malloc(sizeof(mpz_t) * coef_sz);
 
         for (int i = 0; i < coef_sz; i++) {
             mpz_init(coeffs[i]);
@@ -123,7 +127,8 @@ void poly::freeCoeffs() {
         for (int i = 0; i < coef_sz; i++) {
             mpz_clear(coeffs[i]);
         }
-        delete[] coeffs;
+
+    free(coeffs);
     }
 }
 
@@ -139,7 +144,8 @@ void poly::plus(poly &other) {
 
         // coeffs was never initalized
         this->coef_sz = other.coef_sz;
-        this->coeffs = new mpz_t[other.coef_sz];
+
+        coeffs = (mpz_t *)malloc(sizeof(mpz_t) * other.coef_sz);
 
         for (int i = 0; i < coef_sz; i++) {
             mpz_init(coeffs[i]);
@@ -154,7 +160,8 @@ void poly::plus(poly &other) {
     if (other.deg() > this->deg()) {
         // need to reallocate our coeffs to be larger
 
-        mpz_t *new_coeffs = new mpz_t[other.coef_sz];
+        // mpz_t *new_coeffs = new mpz_t[other.coef_sz];
+        mpz_t *new_coeffs = (mpz_t *)malloc(sizeof(mpz_t) * other.coef_sz);
 
         for (int i = 0; i < other.coef_sz; i++) {
             mpz_init(new_coeffs[i]);
@@ -182,7 +189,9 @@ void poly::sub(poly &other) {
 
         // coeffs was never initalized
         this->coef_sz = other.coef_sz;
-        this->coeffs = new mpz_t[other.coef_sz];
+
+        this->coeffs = (mpz_t *)malloc(sizeof(mpz_t) * other.coef_sz);
+        // this->coeffs = new mpz_t[other.coef_sz];
 
         for (int i = 0; i < other.coef_sz; i++) {
             mpz_init(coeffs[i]);
@@ -201,7 +210,9 @@ void poly::sub(poly &other) {
     if (other.deg() > this->deg()) {
         // need to reallocate our coeffs to be larger
 
-        mpz_t *new_coeffs = new mpz_t[other.coef_sz];
+
+        mpz_t *new_coeffs = (mpz_t *)malloc(sizeof(mpz_t) * other.coef_sz);
+        // mpz_t *new_coeffs = new mpz_t[other.coef_sz];
 
         for (int i = 0; i < other.coef_sz; i++) {
             mpz_init(new_coeffs[i]);
@@ -291,8 +302,11 @@ void poly::div_mod(poly &quotient, poly &remainder, poly &other) {
     mpz_init(temp);
     mpz_init(inv);
 
-    mpz_t *Q = new mpz_t[this->coef_sz];
-    mpz_t *R = new mpz_t[this->coef_sz];
+    // std::cout << "coef sz" << this->coef_sz << "\n";
+    mpz_t *Q = (mpz_t *)malloc(sizeof(mpz_t) * this->coef_sz);
+    mpz_t *R = (mpz_t *)malloc(sizeof(mpz_t) * this->coef_sz);
+    // mpz_t *Q = new mpz_t[this->coef_sz];
+    // mpz_t *R = new mpz_t[this->coef_sz];
     for (int i = 0; i < this->coef_sz; i++) {
         mpz_init(Q[i]);                      // init to zero
         mpz_init_set(R[i], this->coeffs[i]); // init to numerator
@@ -301,8 +315,9 @@ void poly::div_mod(poly &quotient, poly &remainder, poly &other) {
     // ensure there is no trailing zeros in other so we can get the coeff of highest order term
     // but we shouldn't ever need to? when we initalize we make sure its not the case
     // other.truncateZeros();
-    modInv(inv, other.coeffs[other.coef_sz - 1]);
 
+    // gmp_printf("inv %Zd \n", other.coeffs[other.coef_sz - 1]);
+    modInv(inv, other.coeffs[other.coef_sz - 1]);
     // gmp_printf("inv %Zd \n", inv);
 
     int len = this->coef_sz - other.coef_sz + 1;
@@ -335,7 +350,7 @@ void generateLagrangeCoeff(std::vector<poly *> &lagrange_poly, vector<int> &poin
     mpz_init(t2);
     mpz_init(temp);
     int xi, xj;
-    poly *temp_poly = new poly(modulus, {1, 1});
+    poly temp_poly = poly(modulus, {1, 1});
     for (size_t i = 0; i < points.size(); i++) {
 
         mpz_set_ui(denom, 1);
@@ -345,9 +360,9 @@ void generateLagrangeCoeff(std::vector<poly *> &lagrange_poly, vector<int> &poin
         for (size_t j = 0; j < points.size(); j++) {
             if (i != j) {
                 // xj = points.at(j);
-                mpz_set_ui(t1, points.at(j));                   // xj
-                math.modSub(temp_poly->coeffs[0], long(0), t1); //  -xj
-                numerator->mult(*temp_poly);
+                mpz_set_ui(t1, points.at(j));                  // xj
+                math.modSub(temp_poly.coeffs[0], long(0), t1); //  -xj
+                numerator->mult(temp_poly);
 
                 math.modSub(temp, t2, t1); //  xi - xj
                 math.modMul(denom, denom, temp);
@@ -374,7 +389,7 @@ void generateLagrangeCoeff(std::vector<poly *> &lagrange_poly, vector<int> &poin
         // }
     }
 
-    delete temp_poly;
+    // delete temp_poly;
     // std::cout << "end\n";
 }
 
@@ -437,6 +452,7 @@ void interpolate(poly &result, vector<int> &points, mpz_t *shares, int numShares
 
 void RS_decode(poly &result, poly &error_loc, vector<int> &points, mpz_t *shares, int numShares, int max_degree, int max_error_count, mpz_t modulus) {
 
+    // std::cout << "hi\n";
     poly H = poly(modulus);
     interpolate(H, points, shares, numShares, modulus);
 

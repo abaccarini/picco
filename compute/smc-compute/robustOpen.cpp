@@ -1,11 +1,8 @@
 
 #include "robustOpen.h"
 
-
-
-
 // Robust opening based onReed-Solomon decoding
-void RobustOpen(mpz_t result, mpz_t var, int threadID, NodeNetwork nodeNet, SecretShare *ss) {
+void RobustOpen(mpz_t result, mpz_t var, bool error_flag, int threadID, NodeNetwork nodeNet, SecretShare *ss) {
     uint peers = ss->getPeers();
 
     mpz_t modulus;
@@ -34,18 +31,27 @@ void RobustOpen(mpz_t result, mpz_t var, int threadID, NodeNetwork nodeNet, Secr
     for (size_t i = 0; i < peers; i++) {
         mpz_set(shares[i], buffer[i][0]); // just moving buffer into shares for consistency
     }
-    std::vector<int> points(peers);                     
-    std::iota(std::begin(points), std::end(points), 1); 
 
+    std::vector<int> points(peers);
+    std::iota(std::begin(points), std::end(points), 1);
 
+    int MAX_MANIPULATED = ss->getThreshold() - 1;
+    int MAX_DEGREE = ss->getThreshold() + 1;
 
-    int MAX_MANIPULATED = ss->getThreshold()-1;
-    int MAX_DEGREE = ss->getThreshold()+1;
-    poly *out_poly = new poly(modulus);
-    poly *error_loc = new poly(modulus);
-    RS_decode(*out_poly, *error_loc, points, shares, points.size(), MAX_DEGREE , MAX_MANIPULATED, modulus);
+    if (error_flag) {
+        // std::cout << "MAX_manipulated "<<MAX_MANIPULATED<<endl;
+        for (size_t i = 0; i < MAX_MANIPULATED ; i++) {
 
-    mpz_set(result, out_poly->coeffs[0]);
+            // randomizing the maximum allowable shares to simulate a malicious party
+            mpz_set_ui(shares[i], 0); 
+        }
+    }
+
+    poly out_poly = poly(modulus);
+    poly error_loc = poly(modulus);
+    RS_decode(out_poly, error_loc, points, shares, points.size(), MAX_DEGREE, MAX_MANIPULATED, modulus);
+
+    // mpz_set(result, out_poly.coeffs[0]); // segfault?
 
     mpz_clear(data[0]);
     free(data);
@@ -57,8 +63,6 @@ void RobustOpen(mpz_t result, mpz_t var, int threadID, NodeNetwork nodeNet, Secr
         free(buffer[i]);
     }
     free(buffer);
-    delete out_poly;
-    delete error_loc;
-
+    // delete out_poly;
+    // delete error_loc;
 }
-
