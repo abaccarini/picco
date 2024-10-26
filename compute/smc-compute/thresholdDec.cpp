@@ -20,6 +20,7 @@
    along with PICCO. If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "Open.h"
 #include "SMC_Utils.h"
 #include "ShamirUtil.h"
 #include "robustOpen.h"
@@ -113,6 +114,7 @@ void SMC_Utils::thresholdDecryption(priv_int *s_prime, mpz_t *a_prime, mpz_t b_p
     ss->modSub(v, b_prime, v);
     ss->modAdd(v, v, E_term);
 
+    // cout<<Open_int(v, -1, net, ss)<<endl;
     RobustOpen(result, v, error_flag, -1, net, ss);
     gettimeofday(&tv2, NULL);
 

@@ -49,5 +49,5 @@ mkdir -p build
 cd build
 
 cmake -DCMAKE_BUILD_TYPE=Release $mode $technique ..
-make -j8
+make -j24
 cd ..

@@ -1,6 +1,6 @@
 #include <float.h>
-#include <limits.h>
 #include <iomanip>
+#include <limits.h>
 
 extern "C" int ort_initialize(int *, char ***);
 extern "C" void ort_finalize(int);
@@ -10,14 +10,13 @@ extern "C" void ort_finalize(int);
 
 SMC_Utils *__s;
 
-// std::vector<int> seed_map = {7, 11};
-std::vector<int> seed_map = {63, 95, 111, 119, 123, 125, 159, 175, 183, 187, 189, 207, 215, 219, 221, 231, 235, 237, 243, 245, 249, 303, 311, 315, 317, 335, 343, 347, 349, 359, 363, 365, 371, 373, 411, 413, 423, 427, 429, 437, 469, 683};
+std::vector<int> seed_map;
 
-bool ERROR_FLAG = true;
+bool ERROR_FLAG = false;
 
 int __original_main(int _argc_ignored, char **_argv_ignored) {
 
-    int L = 1024;
+    int L = 4096;
 
     priv_int bprime;
 
@@ -35,7 +34,7 @@ int __original_main(int _argc_ignored, char **_argv_ignored) {
     __s->smc_input(2, aprime, L, "int", -1);
     __s->smc_input(2, &bprime, "int", -1);
 
-    int iterations = 1000;
+    int iterations = 1;
     double offline_time = 0.0, online_time = 0.0;
     std::cout << "----------------------------------------" << std::endl;
 
@@ -64,27 +63,43 @@ int __original_main(int _argc_ignored, char **_argv_ignored) {
 /* smc-compiler generated main() */
 int main(int argc, char **argv) {
 
-    if (argc < 8) {
+    if (argc < 6) {
         fprintf(stderr, "Incorrect input parameters\n");
-        fprintf(stderr, "Usage: <id> <runtime-config> <privatekey-filename> <number-of-input-parties> <number-of-output-parties> <input-share> <output>\n");
+        fprintf(stderr, "Usage: <id> <runtime-config> <privatekey-filename> <numParties> <sprime_share> <ciphertext>\n");
         exit(1);
     }
 
-    std::string IO_files[atoi(argv[4]) + atoi(argv[5])];
-    for (int i = 0; i < argc - 6; i++)
-        IO_files[i] = argv[6 + i];
+    int numParties = atoi(argv[4]);
+    int threshold;
 
-    // __s = new SMC_Utils(atoi(argv[1]), argv[2], argv[3], atoi(argv[4]), atoi(argv[5]), IO_files, 5, 2, 128, "170141183460469231731687303715884105851", seed_map, 1);
-    __s = new SMC_Utils(atoi(argv[1]), argv[2], argv[3], atoi(argv[4]), atoi(argv[5]), IO_files, 11, 5, 128, "170141183460469231731687303715884105851", seed_map, 1);
+    std::string IO_files[2];
+    for (int i = 0; i < 2; i++)
+        IO_files[i] = argv[5 + i];
+
+    switch (numParties) {
+    case 5:
+        seed_map = {7, 11};
+        threshold = 2;
+        break;
+    case 11:
+        seed_map = {63, 95, 111, 119, 123, 125, 159, 175, 183, 187, 189, 207, 215, 219, 221, 231, 235, 237, 243, 245, 249, 303, 311, 315, 317, 335, 343, 347, 349, 359, 363, 365, 371, 373, 411, 413, 423, 427, 429, 437, 469, 683};
+        threshold = 5;
+        break;
+    default:
+        std::cerr << "wrong number of parties!" << std::endl;
+        exit(1);
+        break;
+    }
+
+    // __s = new SMC_Utils(atoi(argv[1]), argv[2], argv[3], 2, 0, IO_files, numParties, threshold, 128, "200393528695012829568562844035540003081", seed_map, 1);
+    __s = new SMC_Utils(atoi(argv[1]), argv[2], argv[3], 2, 0, IO_files, numParties, threshold, 64, "14156042126774447741 ", seed_map, 1);
 
     struct timeval tv1;
     struct timeval tv2;
     int _xval = 0;
 
     gettimeofday(&tv1, NULL);
-
     _xval = (int)__original_main(argc, argv);
     gettimeofday(&tv2, NULL);
-    // std::cout << "Time: " << __s->time_diff(&tv1, &tv2) << " seconds " << std::endl;
     return (_xval);
 }

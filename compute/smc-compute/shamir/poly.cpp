@@ -498,7 +498,6 @@ void RS_decode(poly &result, poly &error_loc, vector<int> &points, mpz_t *shares
             if (remainder.degree == -1) {
                 result = G;
                 error_loc = T0;
-
                 return;
             } else {
                 cout << "too many errors encountered, aborting..." << endl;
