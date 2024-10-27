@@ -37,6 +37,8 @@ public:
 
     // Modular Inverse
     void modInv(mpz_t, mpz_t);
+
+void newModInv(mpz_t result, mpz_t value);
     void modInv(mpz_t *, mpz_t *, int);
 
     void modAdd(mpz_t *, mpz_t *, long, int);

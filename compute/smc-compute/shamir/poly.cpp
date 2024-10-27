@@ -361,10 +361,17 @@ void generateLagrangeCoeff(std::vector<poly *> &lagrange_poly, vector<int> &poin
                 // xj = points.at(j);
                 mpz_set_ui(t1, points.at(j));                  // xj
                 math.modSub(temp_poly.coeffs[0], long(0), t1); //  -xj
+
+                temp_poly.print("temp_poly");
+
                 numerator->mult(temp_poly);
+
+                numerator->print("num");
 
                 math.modSub(temp, t2, t1); //  xi - xj
                 math.modMul(denom, denom, temp);
+
+                gmp_printf("denom %Zd \n\n", denom);
             }
         }
 
@@ -372,14 +379,19 @@ void generateLagrangeCoeff(std::vector<poly *> &lagrange_poly, vector<int> &poin
         //     gmp_printf("numerator (%i, %Zd) \n", i, numerator->coeffs[i]);
         // }
         //
-        // gmp_printf("denom %Zd \n", denom);
-        math.modInv(temp, denom);
+
+        numerator->print("final num");
+        gmp_printf(">>>>>>>>>>> final denom %Zd \n", denom);
+        math.newModInv(temp, denom);
+        // math.modInv(temp, denom);//old, incorrect if in a ring
+        gmp_printf(">>>>        inv %Zd \n", temp);
+
         math.modMul(numerator->coeffs, numerator->coeffs, temp, numerator->coef_sz);
 
         // for (size_t i = 0; i < numerator->coef_sz; i++) {
         //     gmp_printf("num after (%i, %Zd) \n", i, numerator->coeffs[i]);
         // }
-        // printf("\n");
+        printf("-------\n");
         // printf("\n");
         lagrange_poly.push_back(numerator);
         // std::cout << "hi\n";
@@ -412,6 +424,7 @@ void interpolate(poly &result, vector<int> &points, mpz_t *shares, int numShares
 
     for (size_t i = 0; i < numShares; i++) {
         // math.modMul(lagrange_poly.at(i)->coeffs, lagrange_poly.at(i)->coeffs, shares[i], lagrange_poly.at(i)->coef_sz);
+        lagrange_poly.at(i)->print("ls");
         lagrange_poly.at(i)->multScalar(shares[i]);
         // gmp_printf("share (%i, %Zd) \n", i, shares[i]);
 
@@ -453,7 +466,11 @@ void RS_decode(poly &result, poly &error_loc, vector<int> &points, mpz_t *shares
 
     // std::cout << "hi\n";
     poly H = poly(modulus);
+
+    // gmp_printf("modulus : %Zd \n", modulus);
+    // std::cout << "numShares " << numShares << endl;
     interpolate(H, points, shares, numShares, modulus);
+    H.print("H");
 
     modMath math = modMath(modulus);
     mpz_t t1, t2;
@@ -487,7 +504,15 @@ void RS_decode(poly &result, poly &error_loc, vector<int> &points, mpz_t *shares
 
     poly G = poly(modulus);
     poly remainder = poly(modulus);
+    int ctr = 0;
+
     while (true) {
+        if (ctr > 10) {
+            // preventing overflow
+            cout << "BREAKING" << endl;
+            break;
+        }
+
         R0.div_mod(Q, R2, R1);
 
         if (R0.degree < (max_error_count + max_degree)) {
@@ -521,5 +546,7 @@ void RS_decode(poly &result, poly &error_loc, vector<int> &points, mpz_t *shares
         temp2.sub(temp1);
         T0 = T1;
         T1 = temp2;
+
+        ctr++;
     }
 }

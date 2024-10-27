@@ -32,7 +32,7 @@ int __original_main(int _argc_ignored, char **_argv_ignored) {
     __s->smc_input(2, aprime, L, "int", -1);
     __s->smc_input(2, &bprime, "int", -1);
 
-    for (int ERROR_FLAG = 0; ERROR_FLAG < 2; ERROR_FLAG++) {
+    for (int ERROR_FLAG = 0; ERROR_FLAG < 1; ERROR_FLAG++) {
         int iterations = 1;
         double offline_time = 0.0, online_time = 0.0;
         std::cout << "----------------------------------------" << std::endl;
@@ -92,9 +92,9 @@ int main(int argc, char **argv) {
         break;
     }
 
-        std::cout << "numParties "<< numParties << std::endl;
-        std::cout << "threshold "<< threshold << std::endl;
-    __s = new SMC_Utils(atoi(argv[1]), argv[2], argv[3], 2, 0, IO_files, numParties, threshold, 128, "200393528695012829568562844035540003081", seed_map, 1);
+    std::cout << "numParties " << numParties << std::endl;
+    std::cout << "threshold " << threshold << std::endl;
+    __s = new SMC_Utils(atoi(argv[1]), argv[2], argv[3], 2, 0, IO_files, numParties, threshold, 128, "841", seed_map, 1);
     // __s = new SMC_Utils(atoi(argv[1]), argv[2], argv[3], 2, 0, IO_files, numParties, threshold, 128, "170141183460469231731687303715884105851", seed_map, 1);
 
     struct timeval tv1;

@@ -30,20 +30,22 @@ void RobustOpen(mpz_t result, mpz_t var, bool error_flag, int threadID, NodeNetw
     nodeNet.broadcastToPeers(data, 1, buffer, threadID);
     for (size_t i = 0; i < peers; i++) {
         mpz_set(shares[i], buffer[i][0]); // just moving buffer into shares for consistency
-        gmp_printf("shares[%i] %Zd \n", i, shares[i]);
+        // gmp_printf("shares[%i] %Zd \n", i, shares[i]);
     }
 
     std::vector<int> points(peers);
     std::iota(std::begin(points), std::end(points), 1);
-
+    // for (auto i : points) {
+    //     std::cout << "point i  " << i << endl;
+    // }
     int MAX_MANIPULATED = ss->getThreshold() - 1;
     int MAX_DEGREE = ss->getThreshold() + 1;
 
     if (error_flag) {
         // std::cout << "MAX_manipulated "<<MAX_MANIPULATED<<endl;
-        for (size_t i = 0; i < MAX_MANIPULATED ; i++) {
+        for (size_t i = 0; i < MAX_MANIPULATED; i++) {
             // randomizing the maximum allowable shares to simulate a malicious party
-            mpz_set_ui(shares[i], 0); 
+            mpz_set_ui(shares[i], 0);
         }
     }
 
@@ -51,7 +53,6 @@ void RobustOpen(mpz_t result, mpz_t var, bool error_flag, int threadID, NodeNetw
     poly error_loc = poly(modulus);
 
     RS_decode(out_poly, error_loc, points, shares, points.size(), MAX_DEGREE, MAX_MANIPULATED, modulus);
-
 
     // gmp_printf("result %Zd \n", out_poly.coeffs[0]);
     // mpz_set(result, out_poly.coeffs[0]); // segfault?

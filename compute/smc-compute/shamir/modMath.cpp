@@ -1,11 +1,11 @@
 
 #include "modMath.hpp"
 #include <cstdlib>
-modMath::modMath(mpz_t _PRIME){
+#include <iostream>
+modMath::modMath(mpz_t _PRIME) {
     mpz_init(PRIME);
     mpz_set(PRIME, _PRIME);
 }
-
 
 void modMath::modMul(mpz_t result, mpz_t x, mpz_t y) {
     mpz_mul(result, x, y);
@@ -235,6 +235,28 @@ void modMath::modPow(mpz_t *result, mpz_t *base, long exponent, int size) {
     mpz_clear(value);
 }
 
+void modMath::newModInv(mpz_t result, mpz_t value) {
+
+    mpz_t temp1, temp2;
+    mpz_init(temp1);
+    mpz_init(temp2);
+    // mpz_gcdext(result, temp1, temp2, value, PRIME);
+    mpz_gcdext(temp1, result, temp2, value, PRIME);
+
+    gmp_printf("res %Zd \n", result);
+    gmp_printf("t1 %Zd \n", temp1);
+    gmp_printf("t2 %Zd \n", temp2);
+    if (mpz_cmp_si(result, 0) > 0 or mpz_cmp_si(result, 0) == 0) {
+        // std::cout<<"if\n";
+        return;
+    } else {
+
+        // std::cout<<"else\n";
+        mpz_add(result, result, PRIME);
+        // mpz_mod(result, result, PRIME);
+    }
+}
+
 void modMath::modInv(mpz_t result, mpz_t value) {
     mpz_t temp;
     mpz_init(temp);
@@ -317,4 +339,3 @@ void modMath::copy(mpz_t *src, mpz_t *des, int size) {
     for (int i = 0; i < size; i++)
         mpz_set(des[i], src[i]);
 }
-
