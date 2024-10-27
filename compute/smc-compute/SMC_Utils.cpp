@@ -75,13 +75,13 @@ SMC_Utils::SMC_Utils(int _id, std::string runtime_config, std::string privatekey
 
 // initialize input and output streams (deployment mode only)
 #if __DEPLOYMENT__
-// #if __SHAMIR__
+    // #if __SHAMIR__
     try {
         inputStreams = new std::ifstream[numOfInputPeers];
         outputStreams = new std::ofstream[numOfOutputPeers];
         for (int i = 0; i < numOfInputPeers; i++) {
 
-        std::cout << "opening "<<IO_files[i] << std::endl;
+            // std::cout << "opening "<<IO_files[i] << std::endl;
             inputStreams[i].open(IO_files[i].c_str(), std::ifstream::in);
             if (!inputStreams[i]) {
                 std::cout << "Input files from input party " + std::to_string(i + 1) + " could not be opened\n";
@@ -346,7 +346,7 @@ void SMC_Utils::smc_set(priv_int **a, priv_int **result, int alen_sig, int alen_
         ss_set(a[i], result[i], alen_sig, alen_exp, resultlen_sig, resultlen_exp, type, threadID, net, ss);
 }
 
-void SMC_Utils::smc_set(float *a, priv_int **result, int alen_sig, int alen_exp, int resultlen_sig, int resultlen_exp, int size,std::string type, int threadID) {
+void SMC_Utils::smc_set(float *a, priv_int **result, int alen_sig, int alen_exp, int resultlen_sig, int resultlen_exp, int size, std::string type, int threadID) {
     for (int i = 0; i < size; i++)
         ss_set(a[i], result[i], alen_sig, alen_exp, resultlen_sig, resultlen_exp, type, threadID, net, ss);
 }
@@ -2144,8 +2144,8 @@ void SMC_Utils::smc_rss_benchmark(string operation, int size, int num_iterations
 
     gettimeofday(&end, NULL); // stop timer here
     timer = 1e6 * (end.tv_sec - start.tv_sec) + end.tv_usec - start.tv_usec;
-    printf("[%s_%spc] [%u, %i, %u] [%.6lf ms,  %.6lf ms/size,  %lu bytes] \n", operation.c_str(), std::to_string(numParties).c_str(), ring_size, size, num_iterations, (double)(timer * 0.001) / num_iterations, (double)(timer * 0.001 / size) / num_iterations, 
-    0 / num_iterations);
+    printf("[%s_%spc] [%u, %i, %u] [%.6lf ms,  %.6lf ms/size,  %lu bytes] \n", operation.c_str(), std::to_string(numParties).c_str(), ring_size, size, num_iterations, (double)(timer * 0.001) / num_iterations, (double)(timer * 0.001 / size) / num_iterations,
+           0 / num_iterations);
 
     for (size_t i = 0; i < numShares; i++) {
         delete[] a[i];

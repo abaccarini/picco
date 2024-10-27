@@ -52,6 +52,10 @@ void RobustOpen(mpz_t result, mpz_t var, bool error_flag, int threadID, NodeNetw
     poly out_poly = poly(modulus);
     poly error_loc = poly(modulus);
 
+
+    // for (size_t i = 0; i < peers; i++) {
+    //     gmp_printf("shares[%i] %Zd \n", i, shares[i]);
+    // }
     RS_decode(out_poly, error_loc, points, shares, points.size(), MAX_DEGREE, MAX_MANIPULATED, modulus);
 
     // gmp_printf("result %Zd \n", out_poly.coeffs[0]);

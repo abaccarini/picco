@@ -243,9 +243,9 @@ void modMath::newModInv(mpz_t result, mpz_t value) {
     // mpz_gcdext(result, temp1, temp2, value, PRIME);
     mpz_gcdext(temp1, result, temp2, value, PRIME);
 
-    gmp_printf("res %Zd \n", result);
-    gmp_printf("t1 %Zd \n", temp1);
-    gmp_printf("t2 %Zd \n", temp2);
+    // gmp_printf("res %Zd \n", result);
+    // gmp_printf("t1 %Zd \n", temp1);
+    // gmp_printf("t2 %Zd \n", temp2);
     if (mpz_cmp_si(result, 0) > 0 or mpz_cmp_si(result, 0) == 0) {
         // std::cout<<"if\n";
         return;

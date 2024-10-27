@@ -316,7 +316,9 @@ void poly::div_mod(poly &quotient, poly &remainder, poly &other) {
     // other.truncateZeros();
 
     // gmp_printf("inv %Zd \n", other.coeffs[other.coef_sz - 1]);
-    modInv(inv, other.coeffs[other.coef_sz - 1]);
+    // modInv(inv, other.coeffs[other.coef_sz - 1]);
+
+    newModInv(inv, other.coeffs[other.coef_sz - 1]);
     // gmp_printf("inv %Zd \n", inv);
 
     int len = this->coef_sz - other.coef_sz + 1;
@@ -362,16 +364,16 @@ void generateLagrangeCoeff(std::vector<poly *> &lagrange_poly, vector<int> &poin
                 mpz_set_ui(t1, points.at(j));                  // xj
                 math.modSub(temp_poly.coeffs[0], long(0), t1); //  -xj
 
-                temp_poly.print("temp_poly");
+                // temp_poly.print("temp_poly");
 
                 numerator->mult(temp_poly);
 
-                numerator->print("num");
+                // numerator->print("num");
 
                 math.modSub(temp, t2, t1); //  xi - xj
                 math.modMul(denom, denom, temp);
 
-                gmp_printf("denom %Zd \n\n", denom);
+                // gmp_printf("denom %Zd \n\n", denom);
             }
         }
 
@@ -380,18 +382,18 @@ void generateLagrangeCoeff(std::vector<poly *> &lagrange_poly, vector<int> &poin
         // }
         //
 
-        numerator->print("final num");
-        gmp_printf(">>>>>>>>>>> final denom %Zd \n", denom);
+        // numerator->print("final num");
+        // gmp_printf(">>>>>>>>>>> final denom %Zd \n", denom);
         math.newModInv(temp, denom);
         // math.modInv(temp, denom);//old, incorrect if in a ring
-        gmp_printf(">>>>        inv %Zd \n", temp);
+        // gmp_printf(">>>>        inv %Zd \n", temp);
 
         math.modMul(numerator->coeffs, numerator->coeffs, temp, numerator->coef_sz);
 
         // for (size_t i = 0; i < numerator->coef_sz; i++) {
         //     gmp_printf("num after (%i, %Zd) \n", i, numerator->coeffs[i]);
         // }
-        printf("-------\n");
+        // printf("-------\n");
         // printf("\n");
         lagrange_poly.push_back(numerator);
         // std::cout << "hi\n";
@@ -424,7 +426,7 @@ void interpolate(poly &result, vector<int> &points, mpz_t *shares, int numShares
 
     for (size_t i = 0; i < numShares; i++) {
         // math.modMul(lagrange_poly.at(i)->coeffs, lagrange_poly.at(i)->coeffs, shares[i], lagrange_poly.at(i)->coef_sz);
-        lagrange_poly.at(i)->print("ls");
+        // lagrange_poly.at(i)->print("ls");
         lagrange_poly.at(i)->multScalar(shares[i]);
         // gmp_printf("share (%i, %Zd) \n", i, shares[i]);
 
@@ -470,7 +472,7 @@ void RS_decode(poly &result, poly &error_loc, vector<int> &points, mpz_t *shares
     // gmp_printf("modulus : %Zd \n", modulus);
     // std::cout << "numShares " << numShares << endl;
     interpolate(H, points, shares, numShares, modulus);
-    H.print("H");
+    // H.print("H");
 
     modMath math = modMath(modulus);
     mpz_t t1, t2;
@@ -507,7 +509,7 @@ void RS_decode(poly &result, poly &error_loc, vector<int> &points, mpz_t *shares
     int ctr = 0;
 
     while (true) {
-        if (ctr > 10) {
+        if (ctr > 100) {
             // preventing overflow
             cout << "BREAKING" << endl;
             break;
