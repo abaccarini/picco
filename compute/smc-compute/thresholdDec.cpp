@@ -37,7 +37,7 @@ contains the thresholdDecryption functionality from Noah's Ark (Dahl et al., 202
 Parameters:
 Q - ciphertext modulus (128-bit large prime)
 p - plaintext modulus (2^2)
-L - LWE dimension (1024)
+L - LWE dimension (4096)
 three values are entered into the computation:
     s_prime: a secret-shared L-bit secret key, used to compute b_prime
     a_prime: a *public* random L-vector (generated elsewhere)
@@ -132,6 +132,7 @@ void SMC_Utils::thresholdDecryption(priv_int *s_prime, mpz_t *a_prime, mpz_t b_p
     mpz_clear(temp1);
     mpz_clear(temp2);
     mpz_clear(const2);
+    // mpz_clear(field);
 }
 
 #endif

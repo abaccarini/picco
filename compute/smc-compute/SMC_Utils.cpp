@@ -80,6 +80,8 @@ SMC_Utils::SMC_Utils(int _id, std::string runtime_config, std::string privatekey
         inputStreams = new std::ifstream[numOfInputPeers];
         outputStreams = new std::ofstream[numOfOutputPeers];
         for (int i = 0; i < numOfInputPeers; i++) {
+
+        std::cout << "opening "<<IO_files[i] << std::endl;
             inputStreams[i].open(IO_files[i].c_str(), std::ifstream::in);
             if (!inputStreams[i]) {
                 std::cout << "Input files from input party " + std::to_string(i + 1) + " could not be opened\n";

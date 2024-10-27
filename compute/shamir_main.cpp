@@ -11,13 +11,11 @@ extern "C" void ort_finalize(int);
 SMC_Utils *__s;
 
 std::vector<int> seed_map;
-
-bool ERROR_FLAG = false;
+// bool ERROR_FLAG = false;
 
 int __original_main(int _argc_ignored, char **_argv_ignored) {
 
     int L = 4096;
-
     priv_int bprime;
 
     ss_init(bprime);
@@ -34,21 +32,22 @@ int __original_main(int _argc_ignored, char **_argv_ignored) {
     __s->smc_input(2, aprime, L, "int", -1);
     __s->smc_input(2, &bprime, "int", -1);
 
-    int iterations = 1;
-    double offline_time = 0.0, online_time = 0.0;
-    std::cout << "----------------------------------------" << std::endl;
+    for (int ERROR_FLAG = 0; ERROR_FLAG < 2; ERROR_FLAG++) {
+        int iterations = 1;
+        double offline_time = 0.0, online_time = 0.0;
+        std::cout << "----------------------------------------" << std::endl;
 
-    for (size_t i = 0; i < iterations; i++) {
-        __s->thresholdDecryption(sprime, aprime, bprime, L, -1, offline_time, online_time, ERROR_FLAG);
+        for (size_t i = 0; i < iterations; i++) {
+            __s->thresholdDecryption(sprime, aprime, bprime, L, -1, offline_time, online_time, bool(ERROR_FLAG));
+        }
+
+        std::cout << std::boolalpha;
+        std::cout << "Errors introduced? " << bool(ERROR_FLAG) << std::endl;
+        std::cout << "Offline (PRSS):         " << offline_time / iterations << " ms " << std::endl;
+        std::cout << "Online (v, robustOpen): " << online_time / iterations << " ms " << std::endl;
+        std::cout << "----------------------------------------" << std::endl;
+        std::cout << "Total runtime:          " << (offline_time + online_time) / iterations << " ms " << std::endl;
     }
-
-    std::cout << std::boolalpha;
-    std::cout << "Errors introduced? " << ERROR_FLAG << std::endl;
-    std::cout << "Offline (PRSS):         " << offline_time / iterations << " ms " << std::endl;
-    std::cout << "Online (v, robustOpen): " << online_time / iterations << " ms " << std::endl;
-    std::cout << "----------------------------------------" << std::endl;
-    std::cout << "Total runtime:          " << (offline_time + online_time) / iterations << " ms " << std::endl;
-
     for (int _picco_i = 0; _picco_i < L; _picco_i++) {
         ss_clear(sprime[_picco_i]);
         ss_clear(aprime[_picco_i]);
@@ -73,8 +72,10 @@ int main(int argc, char **argv) {
     int threshold;
 
     std::string IO_files[2];
-    for (int i = 0; i < 2; i++)
+    for (int i = 0; i < 2; i++) {
         IO_files[i] = argv[5 + i];
+        std::cout << IO_files[i] << std::endl;
+    }
 
     switch (numParties) {
     case 5:
@@ -91,8 +92,10 @@ int main(int argc, char **argv) {
         break;
     }
 
-    // __s = new SMC_Utils(atoi(argv[1]), argv[2], argv[3], 2, 0, IO_files, numParties, threshold, 128, "200393528695012829568562844035540003081", seed_map, 1);
-    __s = new SMC_Utils(atoi(argv[1]), argv[2], argv[3], 2, 0, IO_files, numParties, threshold, 64, "14156042126774447741 ", seed_map, 1);
+        std::cout << "numParties "<< numParties << std::endl;
+        std::cout << "threshold "<< threshold << std::endl;
+    __s = new SMC_Utils(atoi(argv[1]), argv[2], argv[3], 2, 0, IO_files, numParties, threshold, 128, "200393528695012829568562844035540003081", seed_map, 1);
+    // __s = new SMC_Utils(atoi(argv[1]), argv[2], argv[3], 2, 0, IO_files, numParties, threshold, 128, "170141183460469231731687303715884105851", seed_map, 1);
 
     struct timeval tv1;
     struct timeval tv2;

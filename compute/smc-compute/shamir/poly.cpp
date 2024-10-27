@@ -128,7 +128,7 @@ void poly::freeCoeffs() {
             mpz_clear(coeffs[i]);
         }
 
-    free(coeffs);
+        free(coeffs);
     }
 }
 
@@ -209,7 +209,6 @@ void poly::sub(poly &other) {
     }
     if (other.deg() > this->deg()) {
         // need to reallocate our coeffs to be larger
-
 
         mpz_t *new_coeffs = (mpz_t *)malloc(sizeof(mpz_t) * other.coef_sz);
         // mpz_t *new_coeffs = new mpz_t[other.coef_sz];
